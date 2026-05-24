@@ -1,19 +1,27 @@
-# Lexer en Kotlin
+# Intérprete en Kotlin
 
-Analizador léxico (Lexer) implementado en Kotlin, basado en el ejemplo de Python.
+Intérprete completo implementado en Kotlin, basado en el ejemplo del profesor en Python.
+Desarrollado en 3 fases: Lexer, Parser y Evaluador.
 
 ## Descripción
-Este lexer convierte código fuente en tokens. Es la primera fase de un intérprete.
+Este intérprete convierte código fuente en resultados ejecutables.
 El lenguaje soportado tiene sintaxis similar a Kotlin.
+
+## Fases del intérprete
+| Fase | Archivos | Descripción |
+|---|---|---|
+| Lexer | TokenType.kt, Tokens.kt, Lexer.kt | Convierte texto en tokens |
+| Parser | AST.kt, Parser.kt | Convierte tokens en árbol AST |
+| Evaluador | ObjectSystem.kt, Evaluator.kt | Ejecuta el programa |
 
 ## Tokens soportados
 | Token | Símbolo |
 |---|---|
 | VAL | val |
 | FUN | fun |
-| IF / ELSE / ELIF | if / else / elif |
+| IF / ELSEIF / ELSE | if / elseif / else |
 | WHILE / FOR | while / for |
-| RETURN | return |
+| RETURN / BREAK / CONTINUE | return / break / continue |
 | PRINT | print |
 | PLUS / MINUS / MULTIPLY / DIVISION | + - * / |
 | MOD / POW | % ** |
@@ -31,43 +39,81 @@ LEXER/
 │   ├── TokenType.kt
 │   ├── Tokens.kt
 │   ├── Lexer.kt
+│   ├── AST.kt
+│   ├── Parser.kt
+│   ├── ObjectSystem.kt
+│   ├── Evaluator.kt
 │   └── Main.kt
-└── test/
-└── test_lexer.kt
+├── test/
+│   └── test_lexer.kt
+├── ejemplo.lf
+└── README.md
 
 ## Cómo compilar y ejecutar
 
-### REPL
-``` En la powershell
-kotlinc src/TokenType.kt src/Tokens.kt src/Lexer.kt src/Main.kt -include-runtime -d lexer.jar
+### Intérprete completo (REPL)
+```powershell
+kotlinc src/TokenType.kt src/Tokens.kt src/Lexer.kt src/AST.kt src/Parser.kt src/ObjectSystem.kt src/Evaluator.kt src/Main.kt -include-runtime -d lexer.jar
 java -jar lexer.jar
 ```
 
-### Tests
-```En la powershell
+### Ejecutar un archivo .lf
+```powershell
+java -jar lexer.jar ejemplo.lf
+```
+
+### Tests del Lexer
+```powershell
 kotlinc src/TokenType.kt src/Tokens.kt src/Lexer.kt test/test_lexer.kt -include-runtime -d test.jar
 java -jar test.jar
 ```
 
 ## Ejemplos de uso
-val x = 10;
-Type : VAL          Literal: 'val'
-Type : IDENTIFIER   Literal: 'x'
-Type : ASSIGN       Literal: '='
-Type : INTEGER      Literal: '10'
-Type : SEMICOLON    Literal: ';'
-fun suma(a, b) { return a + b; }
-Type : FUN          Literal: 'fun'
-Type : IDENTIFIER   Literal: 'suma'
-...
-val msg = "hola
-ERROR: String sin cerrar, le falta '"'
-@
-ERROR: Caracter no reconocido '@'
+
+### Variables y aritmética
+~> val x = 10 + 5;
+15
+~> val nombre = "Laura";
+~> print("Hola, " + nombre);
+"Hola, Laura"
+
+
+### Condicionales
+~> if (x == 15) { print("correcto"); } else { print("incorrecto"); }
+"correcto"
+
+### Funciones y recursión
+~> fun factorial(n) { if (n == 0) { return 1; } return n * factorial(n - 1); }
+~> print(factorial(5));
+120
+
+### Bucles{}
+~> val i = 1;
+~> while (i < 6) { print(i); val i = i + 1; }
+1
+2
+3
+4
+5
+
+### Operadores lógicos
+~> print(true && false);
+false
+~> print(true || false);
+true
+~> print(!true);
+false
 
 ## Manejo de errores
-- Carácter no reconocido → muestra ERROR con el carácter
-- String sin cerrar → muestra ERROR indicando la comilla faltante
+| Error | Ejemplo | Mensaje |
+|---|---|---|
+| Variable no encontrada | `print(z)` | `ERROR: Identificador no encontrado: z` |
+| Tipos incompatibles | `10 + "hola"` | `ERROR: Tipos incompatibles: INTEGER + STRING` |
+| División entre cero | `10 / 0` | `ERROR: División entre cero` |
+| Operador inválido | `!10` | `ERROR: Operador ! no soportado para INTEGER` |
+| String sin cerrar | `"hola` | `ERROR: String sin cerrar, le falta '"'` |
+| Carácter ilegal | `@` | `ERROR: Carácter no reconocido '@'` |
+| Sintaxis incorrecta | `val = 10` | `Error del parser: Se esperaba IDENTIFIER` |
 
 ## Tecnologías
 - Kotlin
