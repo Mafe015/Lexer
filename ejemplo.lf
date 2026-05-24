@@ -1,0 +1,28 @@
+// Variables y aritmética
+val x = 10;
+val nombre = "Laura";
+print("Hola, " + nombre);
+
+// Condicionales
+if (x > 5) {
+    print("es mayor");
+} elif (x == 5) {
+    print("es cinco");
+} else {
+    print("es menor");
+}
+
+// Función recursiva
+fun factorial(n) {
+    if (n == 0) { return 1; }
+    return n * factorial(n - 1);
+}
+print(factorial(5));
+
+// Bucle for
+fun cuadrado(n) { return n * n; }
+val i = 1;
+while (i < 6) {
+    print(cuadrado(i));
+    val i = i + 1;
+}

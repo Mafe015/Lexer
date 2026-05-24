@@ -1,35 +1,47 @@
 //union reply.py y main.py en un solo archivo main.kt
 
-fun startRepl(){
-    val eofToken = Token(TokenType.EOF, "")
+fun main(args: Array<String>) {
+    val env = Environment()  // un solo entorno para todo
 
-    while(true){
-        print(">> ")
-        val source = readLine() ?: break
-        if(source.lowercase() == "exit") break
-
+    // Si se pasa un archivo, lo ejecuta primero
+    if (args.isNotEmpty()) {
+        val source = java.io.File(args[0]).readText()
         val lexer = Lexer(source)
-        var token = lexer.nextToken()
-        while (token != eofToken){
-            when{
-                token.tokenType == TokenType.ILEGAL -> 
-                    println("ERROR: Caracter no reconocido '${token.literal}'")
-                
-                token.tokenType == TokenType.STRING &&
-                token.literal=="ERROR string sin cerrar" -> 
-                    println("ERROR: String sin cerrar u abrir, le falta '\"'")
-                
-                else -> println(token)
-            }
-           
-            
-            token = lexer.nextToken()
+        val parser = Parser(lexer)
+        val program = parser.parseProgram()
+
+        if (parser.errors.isNotEmpty()) {
+            println("Errores del parser:")
+            parser.errors.forEach { println("  ❌ $it") }
+        } else {
+            evaluate(program, env)
         }
     }
+
+    // Siempre abre el REPL después
+    println("Bienvenido al Intérprete Kotlin — escribe 'exit' para salir")
+    startRepl(env)  // pasa el mismo entorno
 }
 
-fun main(){
-    val eofToken = Token(TokenType.EOF, "")
-    println("Bienvenido al Lexer de Kotlin, para salir ingresa 'exit'")
-    startRepl()
+fun startRepl(env: Environment = Environment()) {
+    while (true) {
+        print("~> ")
+        val source = readLine() ?: break
+        if (source.lowercase() == "exit") break
+
+        val lexer = Lexer(source)
+        val parser = Parser(lexer)
+        val program = parser.parseProgram()
+
+        if (parser.errors.isNotEmpty()) {
+            println("Errores del parser:")
+            parser.errors.forEach { println("  ❌ $it") }
+            continue
+        }
+
+        val result = evaluate(program, env)
+        if (result != null && result !is NullObj) {
+            println(result.inspect())
+        }
+    }
 }
